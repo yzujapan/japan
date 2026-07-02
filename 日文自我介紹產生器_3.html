@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 日文自我介紹產生器</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Noto+Sans+TC:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  :root{
+    --paper: #f3eedd;
+    --paper-deep: #ece4cd;
+    --ink: #262220;
+    --ink-soft: #55504a;
+    --red: #b7282b;
+    --red-deep: #8f1f22;
+    --indigo: #2e3a59;
+    --grid-line: rgba(38,34,32,0.09);
+    --card-line: rgba(38,34,32,0.14);
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+
+  body{
+    background-color: var(--paper);
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 34px 34px;
+    color: var(--ink);
+    font-family: 'Noto Sans TC', sans-serif;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap{
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 56px 24px 100px;
+  }
+
+  /* ---------- SITE HEADER ---------- */
+  .site-header{
+    text-align:center;
+    font-family:'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    color: var(--ink-soft);
+    border-bottom: 1px solid var(--card-line);
+    padding-bottom: 16px;
+    margin-bottom: 34px;
+  }
+
+  /* ---------- HERO ---------- */
+  .hero{
+    text-align:center;
+    margin-bottom: 54px;
+  }
+  .hero .eyebrow{
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    letter-spacing: 0.16em;
+    color: var(--red-deep);
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .hero h1{
+    font-family:'Shippori Mincho', serif;
+    font-weight:700;
+    font-size: clamp(30px, 6vw, 44px);
+    margin: 0 0 14px;
+    letter-spacing: 0.02em;
+  }
+  .hero h1 .accent{ color: var(--red); }
+  .hero p{
+    color: var(--ink-soft);
+    font-size: 15.5px;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  /* step rail */
+  .rail{
+    display:flex;
+    justify-content:center;
+    gap: 10px;
+    margin-top: 34px;
+    flex-wrap: wrap;
+  }
+  .rail-item{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-family:'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    color: var(--ink-soft);
+  }
+  .kanji-box{
+    width: 26px; height:26px;
+    border: 1.5px solid var(--red);
+    color: var(--red);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Shippori Mincho', serif;
+    font-weight:700;
+    font-size:15px;
+    border-radius:2px;
+  }
+  .rail-arrow{ color: var(--card-line); }
+
+  /* ---------- SECTION / CARD ---------- */
+  .section{
+    background: var(--paper);
+    border: 1.5px solid var(--card-line);
+    border-radius: 4px;
+    padding: 30px 28px 32px;
+    margin-bottom: 26px;
+    position: relative;
+  }
+  .section::before{
+    content:'';
+    position:absolute;
+    top:0; left:22px;
+    width:1px; height:100%;
+    background: var(--grid-line);
+  }
+
+  .step-head{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    margin-bottom: 22px;
+  }
+  .step-num{
+    width:38px; height:38px;
+    flex-shrink:0;
+    border: 2px solid var(--red);
+    color: var(--red);
+    font-family:'Shippori Mincho', serif;
+    font-weight:700;
+    font-size:20px;
+    display:flex; align-items:center; justify-content:center;
+    border-radius:3px;
+    background: var(--paper);
+  }
+  .step-title-jp{
+    font-family:'Shippori Mincho', serif;
+    font-size: 19px;
+    font-weight:700;
+    line-height:1.3;
+  }
+  .step-title-zh{
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin-top:2px;
+  }
+
+  /* ---------- FORM ---------- */
+  .field{ margin-bottom: 16px; }
+  .field label{
+    display:block;
+    font-size: 13.5px;
+    color: var(--ink);
+    margin-bottom: 6px;
+    font-weight:500;
+  }
+  .field label .num{
+    color: var(--red-deep);
+    font-family:'JetBrains Mono', monospace;
+    margin-right:4px;
+  }
+  .field input{
+    width:100%;
+    padding: 10px 12px;
+    border: 1.5px solid var(--card-line);
+    border-radius: 3px;
+    background: #fffdf7;
+    color: var(--ink);
+    font-family:'Noto Sans TC', sans-serif;
+    font-size: 14.5px;
+    transition: border-color .15s ease;
+  }
+  .field input:focus{
+    outline:none;
+    border-color: var(--red);
+  }
+  .field input::placeholder{ color: #b0a99a; }
+
+  .btn{
+    appearance:none;
+    border:none;
+    cursor:pointer;
+    font-family:'Noto Sans TC', sans-serif;
+    font-weight:700;
+    font-size: 15px;
+    padding: 13px 22px;
+    border-radius: 3px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    width:100%;
+    transition: transform .1s ease, background .15s ease, opacity .15s ease;
+  }
+  .btn:active{ transform: scale(0.98); }
+  .btn-primary{
+    background: var(--red);
+    color: #fdf8ee;
+  }
+  .btn-primary:hover{ background: var(--red-deep); }
+  .btn-primary:disabled{
+    background: #cbc2ac;
+    color: #8a8272;
+    cursor:not-allowed;
+  }
+  .btn-secondary{
+    background: var(--indigo);
+    color: #fdf8ee;
+  }
+  .btn-secondary:hover{ background: #232c44; }
+  .btn-ghost{
+    background: transparent;
+    border: 1.5px solid var(--card-line);
+    color: var(--ink);
+  }
+  .btn-ghost:hover{ border-color: var(--ink); }
+
+  .hint{
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    margin-top: 10px;
+    line-height:1.6;
+  }
+
+  /* ---------- OUTPUT ---------- */
+  .output-box{
+    background: #fffdf7;
+    border: 1.5px solid var(--card-line);
+    border-radius: 3px;
+    padding: 16px 16px;
+    font-family:'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    color: var(--ink);
+    white-space: pre-wrap;
+    word-break: break-word;
+    max-height: 320px;
+    overflow-y: auto;
+    margin-bottom: 16px;
+    min-height: 90px;
+  }
+  .output-box.empty{
+    color: #b0a99a;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+  }
+
+  .btn-row{
+    display:flex;
+    gap: 10px;
+  }
+  .btn-row .btn{ flex:1; }
+
+  .copied-flag{
+    font-size: 13px;
+    color: var(--red-deep);
+    font-weight: 700;
+    margin-top: 10px;
+    text-align:center;
+    opacity: 0;
+    transition: opacity .2s ease;
+  }
+  .copied-flag.show{ opacity: 1; }
+
+  /* ---------- FOOTER NOTE ---------- */
+  .footnote{
+    text-align:center;
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    margin-top: 30px;
+  }
+  .footnote .jp{
+    font-family:'Shippori Mincho', serif;
+    font-size:14px;
+    color: var(--ink);
+    display:block;
+    margin-bottom:4px;
+  }
+
+  @media (max-width: 520px){
+    .wrap{ padding: 36px 16px 80px; }
+    .section{ padding: 24px 18px 26px; }
+    .rail{ gap:6px; }
+    .rail-item{ font-size: 11px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="site-header">2026元智大學人社營－AI智造所</div>
+
+  <div class="hero">
+    <div class="eyebrow">日本語の授業 · AI 活動</div>
+    <h1>AI 日文<span class="accent">自我介紹</span>產生器</h1>
+    <p>填寫基本資料 → 產生提示詞 → 複製貼到 ChatGPT，三步驟完成專屬於你的日文自我介紹。</p>
+
+    <div class="rail">
+      <div class="rail-item"><span class="kanji-box">一</span>填寫資訊</div>
+      <span class="rail-arrow">―――</span>
+      <div class="rail-item"><span class="kanji-box">二</span>產生提示詞</div>
+      <span class="rail-arrow">―――</span>
+      <div class="rail-item"><span class="kanji-box">三</span>複製 → ChatGPT</div>
+      <span class="rail-arrow">―――</span>
+      <div class="rail-item"><span class="kanji-box">四</span>發音練習</div>
+      <span class="rail-arrow">―――</span>
+      <div class="rail-item"><span class="kanji-box">五</span>練習しよう</div>
+    </div>
+  </div>
+
+  <!-- STEP 1 -->
+  <div class="section">
+    <div class="step-head">
+      <div class="step-num">一</div>
+      <div>
+        <div class="step-title-jp">じょうほう にゅうりょく</div>
+        <div class="step-title-zh">STEP 1・填寫你的資訊（用中文回答即可）</div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label><span class="num">1</span>姓名（也可以填羅馬拼音）</label>
+      <input type="text" id="f_name" placeholder="例：王小明 / Wang Xiaoming">
+    </div>
+    <div class="field">
+      <label><span class="num">2</span>年齡／年級</label>
+      <input type="text" id="f_age" placeholder="例：16歲，高一">
+    </div>
+    <div class="field">
+      <label><span class="num">3</span>出生地</label>
+      <input type="text" id="f_place" placeholder="例：台灣・桃園">
+    </div>
+    <div class="field">
+      <label><span class="num">4</span>興趣・喜歡的事物</label>
+      <input type="text" id="f_hobby" placeholder="例：打籃球、看動漫">
+    </div>
+    <div class="field">
+      <label><span class="num">5</span>喜歡的科目 或 擅長的事</label>
+      <input type="text" id="f_subject" placeholder="例：數學、畫畫">
+    </div>
+    <div class="field">
+      <label><span class="num">6</span>社團活動（如果有）</label>
+      <input type="text" id="f_club" placeholder="例：吉他社">
+    </div>
+    <div class="field">
+      <label><span class="num">7</span>未來的夢想 或 一句話（自由發揮）</label>
+      <input type="text" id="f_dream" placeholder="例：想成為老師">
+    </div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="section">
+    <div class="step-head">
+      <div class="step-num">二</div>
+      <div>
+        <div class="step-title-jp">プロンプト さくせい</div>
+        <div class="step-title-zh">STEP 2・產生提示詞</div>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" id="genBtn">產生提示詞</button>
+    <p class="hint" id="genHint">請先至少填寫「姓名」，按下按鈕後，下方會出現完整的提示詞。</p>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="section">
+    <div class="step-head">
+      <div class="step-num">三</div>
+      <div>
+        <div class="step-title-jp">コピー して つかう</div>
+        <div class="step-title-zh">STEP 3・複製，貼到 ChatGPT</div>
+      </div>
+    </div>
+
+    <div class="output-box empty" id="outputBox">尚未產生提示詞，請先完成 STEP 2</div>
+
+    <div class="btn-row">
+      <button class="btn btn-ghost" id="copyBtn" disabled>📋 複製提示詞</button>
+      <button class="btn btn-secondary" id="openBtn">↗ 開啟 ChatGPT</button>
+    </div>
+    <div class="copied-flag" id="copiedFlag">已複製！請切換到 ChatGPT 分頁，貼上（Ctrl+V / Cmd+V）後按下 Enter。</div>
+  </div>
+
+  <!-- STEP 4 -->
+  <div class="section">
+    <div class="step-head">
+      <div class="step-num">四</div>
+      <div>
+        <div class="step-title-jp">はつおん れんしゅう</div>
+        <div class="step-title-zh">STEP 4・發音練習・把 ChatGPT 的回答貼回這裡，聽聽看正確發音</div>
+      </div>
+    </div>
+
+    <p class="hint" style="margin-bottom:12px;">將 ChatGPT 產生的完整回答（含平假名／羅馬拼音／中文翻譯都可以）貼在下方，按下「開始朗讀」就會唸出日文的部分。</p>
+
+    <textarea id="pastebox" placeholder="請把 ChatGPT 的回答貼在這裡……" style="width:100%; min-height:110px; padding:12px; border:1.5px solid var(--card-line); border-radius:3px; background:#fffdf7; color:var(--ink); font-family:'Noto Sans TC', sans-serif; font-size:14px; resize:vertical; margin-bottom:14px;"></textarea>
+
+    <div class="field" style="margin-bottom:14px;">
+      <label>朗讀速度</label>
+      <select id="speedSelect" style="width:100%; padding:10px 12px; border:1.5px solid var(--card-line); border-radius:3px; background:#fffdf7; color:var(--ink); font-family:'Noto Sans TC', sans-serif; font-size:14px;">
+        <option value="0.7">🐢 慢速（初學者推薦）</option>
+        <option value="0.9" selected>🚶 正常速度</option>
+        <option value="1.1">🏃 稍快</option>
+      </select>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" id="speakBtn">🔊 開始朗讀</button>
+      <button class="btn btn-ghost" id="stopBtn">⏹ 停止</button>
+    </div>
+    <p class="hint" id="speakHint">會自動略過羅馬拼音與中文翻譯的部分，只朗讀日文（假名・漢字）。</p>
+
+    <div style="margin-top:22px; padding-top:20px; border-top:1.5px dashed var(--card-line);">
+      <p class="hint" style="margin-bottom:12px;">📱 想用手機聽自己的發音嗎？貼上文字後可以產生專屬 QR Code，用手機掃描就能直接開啟、繼續朗讀。</p>
+      <button class="btn btn-secondary" id="qrBtn">📱 產生 QR Code</button>
+
+      <div id="qrResult" style="display:none; margin-top:18px; text-align:center;">
+        <div id="qrcode" style="display:inline-block; padding:12px; background:#ffffff; border:1.5px solid var(--card-line); border-radius:4px;"></div>
+        <p class="hint" id="qrLink" style="margin-top:12px; word-break:break-all;"></p>
+        <p class="hint" id="qrNote" style="margin-top:4px;"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 5 -->
+  <div class="section">
+    <div class="step-head">
+      <div class="step-num">五</div>
+      <div>
+        <div class="step-title-jp">れんしゅう しよう！</div>
+        <div class="step-title-zh">STEP 5・練習しよう！拿到自我介紹後，練習五十音書寫</div>
+      </div>
+    </div>
+
+    <p class="hint" style="margin-bottom:16px;">產生自我介紹之後，可以到下面的網站練習平假名的書寫，把不熟悉的假名多寫幾次吧！</p>
+
+    <button class="btn btn-primary" id="practiceBtn">✏️ 前往五十音練習</button>
+  </div>
+
+  <div class="footnote">
+    <span class="jp">がんばって！</span>
+    複製後記得在 ChatGPT 貼上並送出，即可看到你的日文自我介紹（含羅馬拼音與中文翻譯）。
+  </div>
+
+</div>
+
+<script>
+  const ids = ['f_name','f_age','f_place','f_hobby','f_subject','f_club','f_dream'];
+  const genBtn = document.getElementById('genBtn');
+  const outputBox = document.getElementById('outputBox');
+  const copyBtn = document.getElementById('copyBtn');
+  const openBtn = document.getElementById('openBtn');
+  const copiedFlag = document.getElementById('copiedFlag');
+  const genHint = document.getElementById('genHint');
+
+  let generatedText = '';
+
+  function buildPrompt(data){
+    const lines = [];
+    lines.push('你是一位日文老師。請根據以下學生填寫的資訊，寫一篇適合高中生程度、簡單易懂的日文自我介紹。');
+    lines.push('');
+    lines.push('【學生資訊】');
+    lines.push('1. 姓名：' + (data.f_name || '（未填寫）'));
+    lines.push('2. 年齡／年級：' + (data.f_age || '（未填寫）'));
+    lines.push('3. 出生地：' + (data.f_place || '（未填寫）'));
+    lines.push('4. 興趣・喜歡的事物：' + (data.f_hobby || '（未填寫）'));
+    lines.push('5. 喜歡的科目 或 擅長的事：' + (data.f_subject || '（未填寫）'));
+    lines.push('6. 社團活動：' + (data.f_club || '（無）'));
+    lines.push('7. 未來的夢想 或 一句話：' + (data.f_dream || '（未填寫）'));
+    lines.push('');
+    lines.push('【條件】');
+    lines.push('- 日文難度請控制在 JLPT N5〜N4 程度，只使用簡單的句型。');
+    lines.push('- 句子長度約5〜7句。');
+    lines.push('- 請全部使用平假名書寫，不要使用漢字（專有名詞也請盡量用平假名表示）。');
+    lines.push('- 輸出格式請採用「一句（或一個意義段落）為單位，第一行寫平假名句子，第二行寫該句的羅馬拼音」，兩者交錯排列。');
+    lines.push('  例如：');
+    lines.push('  わたしは たなかです。');
+    lines.push('  watashi wa tanaka desu.');
+    lines.push('  こうこうに にねんせい です。');
+    lines.push('  koukou ni nensei desu.');
+    lines.push('- 羅馬拼音請使用平文式（Hepburn式）。');
+    lines.push('- 最後請附上整段的中文翻譯。');
+    lines.push('');
+    lines.push('請依照以上條件，撰寫這篇自我介紹文。');
+    return lines.join('\n');
+  }
+
+  genBtn.addEventListener('click', () => {
+    const data = {};
+    ids.forEach(id => data[id] = document.getElementById(id).value.trim());
+
+    if(!data.f_name){
+      genHint.textContent = '請至少填寫「姓名」欄位喔！';
+      genHint.style.color = '#b7282b';
+      document.getElementById('f_name').focus();
+      return;
+    }
+    genHint.style.color = '';
+    genHint.textContent = '提示詞已產生，請至 STEP 3 複製使用。';
+
+    generatedText = buildPrompt(data);
+    outputBox.textContent = generatedText;
+    outputBox.classList.remove('empty');
+    copyBtn.disabled = false;
+    copiedFlag.classList.remove('show');
+
+    outputBox.scrollIntoView({behavior:'smooth', block:'center'});
+  });
+
+  copyBtn.addEventListener('click', async () => {
+    if(!generatedText) return;
+    try{
+      await navigator.clipboard.writeText(generatedText);
+    }catch(e){
+      const ta = document.createElement('textarea');
+      ta.value = generatedText;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+    }
+    copiedFlag.classList.add('show');
+  });
+
+  openBtn.addEventListener('click', () => {
+    window.open('https://chatgpt.com/', '_blank');
+  });
+
+  document.getElementById('practiceBtn').addEventListener('click', () => {
+    window.open('https://my-gojuon.vercel.app/WritingPractice', '_blank');
+  });
+
+  // ---------- STEP 4: pronunciation practice (speech synthesis) ----------
+  const pastebox = document.getElementById('pastebox');
+  const speedSelect = document.getElementById('speedSelect');
+  const speakBtn = document.getElementById('speakBtn');
+  const stopBtn = document.getElementById('stopBtn');
+  const speakHint = document.getElementById('speakHint');
+
+  const jpLineRegex = /[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FFF]/; // hiragana, katakana, kanji
+
+  function extractJapaneseText(raw){
+    const jpOnly = raw
+      .split('\n')
+      .map(line => line.trim())
+      .filter(line => line.length > 0 && jpLineRegex.test(line))
+      // drop lines that are mostly ASCII (romaji) even if a stray CJK punctuation sneaks in
+      .filter(line => {
+        const jpChars = (line.match(/[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FFF]/g) || []).length;
+        return jpChars / line.length > 0.3;
+      })
+      .join('。');
+    return fixParticlePronunciation(jpOnly);
+  }
+
+  // Browsers' built-in speech synthesis often can't tell "は" used as a
+  // topic-marking particle (pronounced "わ") from "は" that's just part of a
+  // word (pronounced "は"), especially with no kanji to lean on.
+  // Heuristic: a "は" directly followed by a space/full-width space/comma/
+  // sentence-ending punctuation (or end of text), and not at the very start
+  // of the text, is almost always the topic particle -> swap it for "わ"
+  // before speaking. Also covers "へ" (direction particle, pronounced "え").
+  function fixParticlePronunciation(text){
+    return text
+      .replace(/([^\s])は(?=[\s　、。！？!?]|$)/g, '$1わ')
+      .replace(/([^\s])へ(?=[\s　、。！？!?]|$)/g, '$1え');
+  }
+
+  speakBtn.addEventListener('click', () => {
+    const raw = pastebox.value.trim();
+    if(!raw){
+      speakHint.textContent = '請先貼上 ChatGPT 的回答再按朗讀喔！';
+      speakHint.style.color = '#b7282b';
+      pastebox.focus();
+      return;
+    }
+    if(!('speechSynthesis' in window)){
+      speakHint.textContent = '很抱歉，這個瀏覽器不支援朗讀功能，建議改用 Chrome 開啟本網站。';
+      speakHint.style.color = '#b7282b';
+      return;
+    }
+
+    const jpText = extractJapaneseText(raw);
+    if(!jpText){
+      speakHint.textContent = '找不到日文內容，請確認貼上的內容含有假名或漢字。';
+      speakHint.style.color = '#b7282b';
+      return;
+    }
+
+    window.speechSynthesis.cancel();
+    const utter = new SpeechSynthesisUtterance(jpText);
+    utter.lang = 'ja-JP';
+    utter.rate = parseFloat(speedSelect.value);
+
+    const voices = window.speechSynthesis.getVoices();
+    const jpVoice = voices.find(v => v.lang && v.lang.toLowerCase().startsWith('ja'));
+    if(jpVoice) utter.voice = jpVoice;
+
+    utter.onstart = () => {
+      speakHint.style.color = '#2e3a59';
+      speakHint.textContent = '🔊 朗讀中……';
+    };
+    utter.onend = () => {
+      speakHint.style.color = '';
+      speakHint.textContent = '會自動略過羅馬拼音與中文翻譯的部分，只朗讀日文（假名・漢字）。';
+    };
+    utter.onerror = () => {
+      speakHint.style.color = '#b7282b';
+      speakHint.textContent = '朗讀時發生錯誤，請再試一次。';
+    };
+
+    window.speechSynthesis.speak(utter);
+  });
+
+  stopBtn.addEventListener('click', () => {
+    window.speechSynthesis.cancel();
+    speakHint.style.color = '';
+    speakHint.textContent = '已停止朗讀。';
+  });
+
+  // ---------- QR code: send the pasted text to a phone ----------
+  const qrBtn = document.getElementById('qrBtn');
+  const qrResult = document.getElementById('qrResult');
+  const qrLink = document.getElementById('qrLink');
+  const qrNote = document.getElementById('qrNote');
+  const qrcodeDiv = document.getElementById('qrcode');
+
+  function encodeText(text){
+    return btoa(unescape(encodeURIComponent(text)));
+  }
+  function decodeText(b64){
+    return decodeURIComponent(escape(atob(b64)));
+  }
+
+  qrBtn.addEventListener('click', () => {
+    const raw = pastebox.value.trim();
+    if(!raw){
+      qrNote.style.color = '#b7282b';
+      qrNote.textContent = '請先貼上 ChatGPT 的回答，再產生 QR Code。';
+      qrResult.style.display = 'block';
+      qrcodeDiv.innerHTML = '';
+      qrLink.textContent = '';
+      pastebox.focus();
+      return;
+    }
+
+    const encoded = encodeText(raw);
+    const url = location.origin + location.pathname + '?jp=' + encoded;
+
+    qrcodeDiv.innerHTML = '';
+    new QRCode(qrcodeDiv, {
+      text: url,
+      width: 180,
+      height: 180,
+      colorDark: '#262220',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.L
+    });
+
+    qrLink.textContent = url;
+    qrResult.style.display = 'block';
+
+    if(location.protocol === 'file:'){
+      qrNote.style.color = '#b7282b';
+      qrNote.textContent = '⚠️ 目前是在電腦本機開啟這個檔案，手機無法掃描開啟。請先把這個網頁上傳到網路（例如 GitHub Pages、Google Sites、Vercel）後再產生 QR Code。';
+    }else{
+      qrNote.style.color = '';
+      qrNote.textContent = '用手機相機掃描上方 QR Code，就能在手機上開啟並繼續朗讀。';
+    }
+
+    qrResult.scrollIntoView({behavior:'smooth', block:'center'});
+  });
+
+  // If this page was opened via a QR code (has ?jp=... in the URL),
+  // auto-fill the paste box so the student can tap "開始朗讀" right away.
+  (function autoFillFromUrl(){
+    const params = new URLSearchParams(location.search);
+    const jp = params.get('jp');
+    if(!jp) return;
+    try{
+      pastebox.value = decodeText(jp);
+      speakHint.style.color = 'var(--red-deep, #8f1f22)';
+      speakHint.textContent = '✅ 已自動帶入你的自我介紹內容，點下方「開始朗讀」聽聽看吧！';
+      pastebox.scrollIntoView({behavior:'smooth', block:'center'});
+    }catch(e){
+      // ignore malformed parameter
+    }
+  })();
+</script>
+
+</body>
+</html>
